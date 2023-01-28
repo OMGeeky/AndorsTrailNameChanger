@@ -11,17 +11,18 @@ function change_name(int_array, targetName) {
     var data = Array.from(int_array)
 
     //remove old name bytes
-    var old_name_len = data[START_OF_NAME_LEN_INDEX];
-    for(let i = 0; i < old_name_len; i++){
-        data.splice(START_OF_NAME_INDEX,1)
-    }
+    console.log(data);
+    let old_name_len = data[START_OF_NAME_LEN_INDEX];
+    data.splice(START_OF_NAME_INDEX, old_name_len);
+
+    console.log(data);
 
     //enter new name
     data[START_OF_NAME_LEN_INDEX] = targetName.length;
     for (let i = 0; i<targetName.length; i++){
         data.splice(START_OF_NAME_INDEX + i, 0, targetName[i]);
     }
-
+    console.log(data);
     return data;
 }
 
@@ -59,8 +60,8 @@ document.getElementById('do_it').addEventListener('click', function() {
         let result = Uint8Array.from(change_name(int_array, name_bytes));
         console.log(result);
         console.log(typeof result);
-        let result_str = new TextDecoder().decode(result);
-        download([result_str], filename);
+        console.log("result str:\n" + result)
+        download([result], filename);
 
         console.log('downloaded')
     }
