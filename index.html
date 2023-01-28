@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<body>
+<input id="new_name_input" type="text" />
+<input id="savegame_input" type="file" />
+<button id="do_it" >change name</button>
+<script>
+const START_OF_NAME_LEN_INDEX = 5;
+const START_OF_NAME_INDEX = START_OF_NAME_LEN_INDEX + 1;
+function change_name(int_array, targetName) {
+    var data = Array.from(int_array)
+
+    //remove old name bytes
+    var old_name_len = data[START_OF_NAME_LEN_INDEX];
+    for(let i = 0; i < old_name_len; i++){
+        data.splice(START_OF_NAME_INDEX,1)
+    }
+
+    //enter new name
+    data[START_OF_NAME_LEN_INDEX] = targetName.length;
+    for (let i = 0; i<targetName.length; i++){
+        data.splice(START_OF_NAME_INDEX + i, 0, targetName[i]);
+    }
+
+    return data;
+}
+
+var download = (function () {
+    var dwnld = document.createElement("a");
+    document.body.appendChild(dwnld);
+    dwnld.style = "display: none";
+    return function (data, name) {
+        var blob = new Blob(data, {type: "octet/stream"}),
+            url = window.URL.createObjectURL(blob);
+        console.log(blob);
+        console.log(typeof blob);
+        console.log(url);
+        dwnld.href = url;
+        dwnld.download = name;
+        dwnld.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
+document.getElementById('do_it').addEventListener('click', function() {
+
+    let new_name = document.getElementById('new_name_input').value,
+        reader = new FileReader(),
+        file_input = document.getElementById('savegame_input'),
+        filename = file_input.files[0].name;
+
+    reader.onload = function() {
+
+        let arrayBuffer = this.result,
+            int_array = new Uint8Array(arrayBuffer);
+
+        let name_bytes = new TextEncoder().encode(new_name);
+
+        let result = Uint8Array.from(change_name(int_array, name_bytes));
+        console.log(result);
+        console.log(typeof result);
+        let result_str = new TextDecoder().decode(result);
+        download([result_str], filename);
+
+        console.log('downloaded')
+    }
+    reader.readAsArrayBuffer(file_input.files[0]);
+
+}, false);
+</script>
+</body>
+</html>
